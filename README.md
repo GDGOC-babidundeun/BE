@@ -65,3 +65,35 @@ API 연동 완료
 로컬 테스트 완료
 PR 생성 및 리뷰 완료
 develop 브랜치에 Merge 완료
+
+<br><br>
+
+## 🗄️ 로컬 DB 실행
+
+### 준비
+
+- Docker Desktop 또는 Docker Engine
+- Java 21
+
+### 실행 방법
+
+```bash
+cp .env.example .env
+docker compose up -d
+./gradlew bootRun
+```
+
+MySQL은 기본적으로 `localhost:3306`에서 실행되며, DB 이름은 `babi_order`입니다.
+개인별 접속 정보와 Toss Secret Key는 `.env`에서 변경하고 `.env`는 Git에 커밋하지 않습니다.
+
+### 종료
+
+```bash
+docker compose down
+```
+
+DB 데이터까지 초기화해야 할 때만 다음 명령을 사용합니다.
+
+```bash
+docker compose down -v
+```
