@@ -1,4 +1,4 @@
-package com.gdgoc.babi_order.exception;
+package com.gdgoc.babi_order.payment.exception;
 
 public class TossPaymentException extends RuntimeException {
     public TossPaymentException(String message) {

@@ -1,10 +1,10 @@
-package com.gdgoc.babi_order.controller;
+package com.gdgoc.babi_order.payment.controller;
 
-import com.gdgoc.babi_order.dto.request.PaymentCancelRequest;
-import com.gdgoc.babi_order.dto.request.PaymentConfirmRequest;
-import com.gdgoc.babi_order.dto.response.PaymentConfirmResponse;
-import com.gdgoc.babi_order.dto.response.PaymentResponse;
-import com.gdgoc.babi_order.service.PaymentService;
+import com.gdgoc.babi_order.payment.dto.request.PaymentCancelRequest;
+import com.gdgoc.babi_order.payment.dto.request.PaymentConfirmRequest;
+import com.gdgoc.babi_order.payment.dto.response.PaymentConfirmResponse;
+import com.gdgoc.babi_order.payment.dto.response.PaymentResponse;
+import com.gdgoc.babi_order.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

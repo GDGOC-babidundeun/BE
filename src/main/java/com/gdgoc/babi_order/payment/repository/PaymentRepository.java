@@ -1,6 +1,6 @@
-package com.gdgoc.babi_order.repository;
+package com.gdgoc.babi_order.payment.repository;
 
-import com.gdgoc.babi_order.domain.Payment;
+import com.gdgoc.babi_order.payment.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

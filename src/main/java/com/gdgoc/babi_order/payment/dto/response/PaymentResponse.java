@@ -1,4 +1,4 @@
-package com.gdgoc.babi_order.dto.response;
+package com.gdgoc.babi_order.payment.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;

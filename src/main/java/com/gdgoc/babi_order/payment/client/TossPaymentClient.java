@@ -1,7 +1,7 @@
-package com.gdgoc.babi_order.client;
+package com.gdgoc.babi_order.payment.client;
 
-import com.gdgoc.babi_order.config.TossPaymentProperties;
-import com.gdgoc.babi_order.exception.TossPaymentException;
+import com.gdgoc.babi_order.payment.config.TossPaymentProperties;
+import com.gdgoc.babi_order.payment.exception.TossPaymentException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;

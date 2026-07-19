@@ -1,14 +1,14 @@
-package com.gdgoc.babi_order.service;
+package com.gdgoc.babi_order.payment.service;
 
-import com.gdgoc.babi_order.client.TossPaymentClient;
-import com.gdgoc.babi_order.domain.Payment;
-import com.gdgoc.babi_order.domain.PaymentStatus;
-import com.gdgoc.babi_order.dto.request.PaymentCancelRequest;
-import com.gdgoc.babi_order.dto.request.PaymentConfirmRequest;
-import com.gdgoc.babi_order.dto.response.PaymentConfirmResponse;
-import com.gdgoc.babi_order.dto.response.PaymentResponse;
-import com.gdgoc.babi_order.exception.TossPaymentException;
-import com.gdgoc.babi_order.repository.PaymentRepository;
+import com.gdgoc.babi_order.payment.client.TossPaymentClient;
+import com.gdgoc.babi_order.payment.entity.Payment;
+import com.gdgoc.babi_order.payment.entity.PaymentStatus;
+import com.gdgoc.babi_order.payment.dto.request.PaymentCancelRequest;
+import com.gdgoc.babi_order.payment.dto.request.PaymentConfirmRequest;
+import com.gdgoc.babi_order.payment.dto.response.PaymentConfirmResponse;
+import com.gdgoc.babi_order.payment.dto.response.PaymentResponse;
+import com.gdgoc.babi_order.payment.exception.TossPaymentException;
+import com.gdgoc.babi_order.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
