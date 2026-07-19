@@ -1,4 +1,4 @@
-package com.gdgoc.babi_order.config;
+package com.gdgoc.babi_order.payment.config;
 
 import lombok.Getter;
 import lombok.Setter;

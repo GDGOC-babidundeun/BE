@@ -1,4 +1,4 @@
-package com.gdgoc.babi_order.domain;
+package com.gdgoc.babi_order.payment.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
