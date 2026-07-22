@@ -1,5 +1,6 @@
 package com.gdgoc.babi_order.payment.entity;
 
+import com.gdgoc.babi_order.order.entity.Order;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,8 +19,12 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "orders_id", nullable = false, length = 200)
-    private String orderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    @Column(name = "toss_order_id", nullable = false, length = 200)
+    private String tossOrderId;
 
     @Column(name = "payment_key", nullable = false, length = 200)
     private String paymentKey;
@@ -44,9 +49,10 @@ public class Payment {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Payment(String orderId, String paymentKey, Integer amount,
+    public Payment(Order order, String tossOrderId, String paymentKey, Integer amount,
                    PaymentStatus status, LocalDateTime approvedAt) {
-        this.orderId = orderId;
+        this.order = order;
+        this.tossOrderId = tossOrderId;
         this.paymentKey = paymentKey;
         this.amount = amount;
         this.status = status;

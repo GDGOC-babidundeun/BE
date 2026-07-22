@@ -64,9 +64,9 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getByPaymentKey(paymentKey));
     }
 
-    @Operation(summary = "결제 조회 (orderId)", description = "토스 주문번호로 결제 내역을 조회합니다.")
+    @Operation(summary = "결제 조회 (orderId)", description = "주문 ID로 결제 내역을 조회합니다.")
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<PaymentResponse> getByOrderId(@PathVariable("orderId") String orderId) {
+    public ResponseEntity<PaymentResponse> getByOrderId(@PathVariable("orderId") Long orderId) {
         return ResponseEntity.ok(paymentService.getByOrderId(orderId));
     }
 
