@@ -1,5 +1,6 @@
 package com.gdgoc.babi_order.menu.controller;
 
+import com.gdgoc.babi_order.config.CorsProperties;
 import com.gdgoc.babi_order.config.SecurityConfig;
 import com.gdgoc.babi_order.menu.dto.response.CategoryMenuResponse;
 import com.gdgoc.babi_order.menu.dto.response.MenuDetailResponse;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MenuController.class)
-@Import({SecurityConfig.class, MenuExceptionHandler.class})
+@Import({SecurityConfig.class, CorsProperties.class, MenuExceptionHandler.class})
 class MenuControllerTest {
 
     @Autowired
