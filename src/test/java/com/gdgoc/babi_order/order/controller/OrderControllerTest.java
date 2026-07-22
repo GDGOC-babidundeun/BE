@@ -1,5 +1,6 @@
 package com.gdgoc.babi_order.order.controller;
 
+import com.gdgoc.babi_order.config.CorsProperties;
 import com.gdgoc.babi_order.config.SecurityConfig;
 import com.gdgoc.babi_order.order.dto.response.OrderDetailResponse;
 import com.gdgoc.babi_order.order.dto.response.OrderSummaryResponse;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(OrderController.class)
-@Import({SecurityConfig.class, OrderExceptionHandler.class})
+@Import({SecurityConfig.class, CorsProperties.class, OrderExceptionHandler.class})
 class OrderControllerTest {
 
     @Autowired

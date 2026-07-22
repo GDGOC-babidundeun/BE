@@ -17,8 +17,11 @@ public class PaymentResponse {
     @Schema(description = "토스 결제 키")
     private String paymentKey;
 
+    @Schema(description = "주문 ID")
+    private Long orderId;
+
     @Schema(description = "토스 주문번호")
-    private String orderId;
+    private String tossOrderId;
 
     @Schema(description = "결제 금액")
     private Integer amount;

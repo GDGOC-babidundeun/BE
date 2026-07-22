@@ -38,7 +38,7 @@ public class PaymentService {
     @Transactional
     public PaymentConfirmResponse confirm(PaymentConfirmRequest request) {
         Order order = findOrderByTossOrderId(request.getOrderId());
-        validateNotAlreadyPaid(request.getOrderId());
+        validateNotAlreadyPaid(order.getId());
         validateAmount(order.getTotalAmount(), request.getAmount());
 
         TossPaymentClient.TossPaymentResponse tossResponse = tossPaymentClient.confirm(
@@ -58,7 +58,8 @@ public class PaymentService {
 
         LocalDateTime approvedAt = OffsetDateTime.parse(tossResponse.getApprovedAt()).toLocalDateTime();
         Payment payment = Payment.builder()
-                .orderId(request.getOrderId())
+                .order(order)
+                .tossOrderId(request.getOrderId())
                 .paymentKey(request.getPaymentKey())
                 .amount(request.getAmount())
                 .status(PaymentStatus.DONE)
@@ -70,7 +71,8 @@ public class PaymentService {
         return PaymentConfirmResponse.builder()
                 .id(saved.getId())
                 .paymentKey(saved.getPaymentKey())
-                .orderId(saved.getOrderId())
+                .orderId(saved.getOrder().getId())
+                .tossOrderId(saved.getTossOrderId())
                 .amount(saved.getAmount())
                 .status(saved.getStatus().name())
                 .approvedAt(saved.getApprovedAt())
@@ -88,8 +90,8 @@ public class PaymentService {
                 .orElseThrow(() -> new PaymentOrderNotFoundException(tossOrderId));
     }
 
-    private void validateNotAlreadyPaid(String orderId) {
-        paymentRepository.findByOrderId(orderId)
+    private void validateNotAlreadyPaid(Long orderId) {
+        paymentRepository.findByOrder_Id(orderId)
                 .filter(payment -> payment.getStatus() == PaymentStatus.DONE)
                 .ifPresent(payment -> {
                     throw new PaymentAlreadyProcessedException(orderId);
@@ -163,8 +165,8 @@ public class PaymentService {
         return toPaymentResponse(payment);
     }
 
-    public PaymentResponse getByOrderId(String orderId) {
-        Payment payment = paymentRepository.findByOrderId(orderId)
+    public PaymentResponse getByOrderId(Long orderId) {
+        Payment payment = paymentRepository.findByOrder_Id(orderId)
                 .orElseThrow(() -> PaymentNotFoundException.byOrderId(orderId));
         return toPaymentResponse(payment);
     }
@@ -182,7 +184,8 @@ public class PaymentService {
         return PaymentResponse.builder()
                 .id(payment.getId())
                 .paymentKey(payment.getPaymentKey())
-                .orderId(payment.getOrderId())
+                .orderId(payment.getOrder().getId())
+                .tossOrderId(payment.getTossOrderId())
                 .amount(payment.getAmount())
                 .status(payment.getStatus().name())
                 .cancelReason(payment.getCancelReason())
