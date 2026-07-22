@@ -68,4 +68,8 @@ public class Payment {
         this.status = PaymentStatus.CANCELED;
         this.cancelReason = cancelReason;
     }
+
+    public void syncStatus(PaymentStatus status) {
+        this.status = status;
+    }
 }

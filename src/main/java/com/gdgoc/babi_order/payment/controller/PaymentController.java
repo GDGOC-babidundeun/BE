@@ -2,7 +2,9 @@ package com.gdgoc.babi_order.payment.controller;
 
 import com.gdgoc.babi_order.payment.dto.request.PaymentCancelRequest;
 import com.gdgoc.babi_order.payment.dto.request.PaymentConfirmRequest;
+import com.gdgoc.babi_order.payment.dto.request.PaymentWebhookRequest;
 import com.gdgoc.babi_order.payment.dto.response.PaymentConfirmResponse;
+import com.gdgoc.babi_order.payment.dto.response.PaymentFailResponse;
 import com.gdgoc.babi_order.payment.dto.response.PaymentResponse;
 import com.gdgoc.babi_order.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,6 +41,15 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.confirm(request));
     }
 
+    @Operation(summary = "결제 실패 콜백", description = "토스 결제창에서 실패/취소 시 failUrl로 호출됩니다.")
+    @GetMapping("/fail")
+    public ResponseEntity<PaymentFailResponse> fail(
+            @RequestParam("code") String code,
+            @RequestParam("message") String message,
+            @RequestParam(value = "orderId", required = false) String orderId) {
+        return ResponseEntity.ok(paymentService.handleFailure(code, message, orderId));
+    }
+
     @Operation(summary = "결제 취소", description = "승인된 결제를 취소합니다.")
     @PostMapping("/{paymentKey}/cancel")
     public ResponseEntity<PaymentResponse> cancel(
@@ -57,5 +68,12 @@ public class PaymentController {
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<PaymentResponse> getByOrderId(@PathVariable("orderId") String orderId) {
         return ResponseEntity.ok(paymentService.getByOrderId(orderId));
+    }
+
+    @Operation(summary = "결제 상태 변경 웹훅", description = "Toss가 결제 상태 변경 시 호출합니다. payload를 그대로 신뢰하지 않고 조회 API로 재검증 후 동기화합니다.")
+    @PostMapping("/webhook")
+    public ResponseEntity<Void> handleWebhook(@RequestBody PaymentWebhookRequest request) {
+        paymentService.syncFromWebhook(request);
+        return ResponseEntity.ok().build();
     }
 }
