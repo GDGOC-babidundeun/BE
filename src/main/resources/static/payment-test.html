@@ -35,8 +35,8 @@
       orderId: Math.random().toString(36).slice(2),
       orderName: "바비오더 테스트 결제",
       customerName: "테스트 고객",
-      successUrl: "http://localhost:8080/api/payments/success",
-      failUrl: "http://localhost:8080/api/payments/fail",
+      successUrl: window.location.origin + "/api/payments/success",
+      failUrl: window.location.origin + "/api/payments/fail",
     }).catch(function (error) {
       if (error.code !== "USER_CANCEL") {
         alert("오류: " + error.message);
