@@ -80,9 +80,14 @@ public class PaymentService {
     }
 
     private Order findOrderByTossOrderId(String tossOrderId) {
+        // tossOrderId는 "000007-a1b2c3d4"처럼 주문 PK를 0-패딩한 값 뒤에
+        // 랜덤 접미사를 붙인 형태이므로, 하이픈 앞부분만 파싱해 주문을 찾는다.
+        String idPart = tossOrderId.contains("-")
+                ? tossOrderId.substring(0, tossOrderId.indexOf('-'))
+                : tossOrderId;
         Long orderId;
         try {
-            orderId = Long.parseLong(tossOrderId);
+            orderId = Long.parseLong(idPart);
         } catch (NumberFormatException e) {
             throw new PaymentOrderNotFoundException(tossOrderId);
         }

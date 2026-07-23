@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -68,9 +69,11 @@ public class Order {
         return Collections.unmodifiableList(items);
     }
 
-    // Toss는 orderId가 6자 이상이어야 하므로, PK를 0으로 패딩해 항상 요구 조건을 만족시킨다.
+    // Toss 샌드박스는 orderId 유일성을 전체 테스트 계정 간에 공유하므로,
+    // PK를 0-패딩한 뒤 랜덤 접미사를 붙여 다른 계정과의 충돌을 피한다.
     public String getTossOrderId() {
-        return String.format("%06d", id);
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        return String.format("%06d", id) + "-" + suffix;
     }
 
     @PrePersist
