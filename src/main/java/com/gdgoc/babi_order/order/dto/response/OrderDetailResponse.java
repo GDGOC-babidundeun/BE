@@ -12,6 +12,7 @@ import java.util.List;
 public class OrderDetailResponse {
 
     private Long id;
+    private String tossOrderId;
     private Integer pickupNumber;
     private String status;
     private Integer totalAmount;
@@ -22,6 +23,7 @@ public class OrderDetailResponse {
     public static OrderDetailResponse from(Order order) {
         return OrderDetailResponse.builder()
                 .id(order.getId())
+                .tossOrderId(order.getTossOrderId())
                 .pickupNumber(order.getPickupNumber())
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())

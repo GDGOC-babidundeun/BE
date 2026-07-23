@@ -43,7 +43,7 @@
 
       await tossPayments.requestPayment("카드", {
         amount: order.totalAmount,
-        orderId: String(order.id).padStart(6, "0"),
+        orderId: order.tossOrderId,
         orderName: "바비오더 테스트 결제",
         customerName: "테스트 고객",
         successUrl: window.location.origin + "/api/payments/success",

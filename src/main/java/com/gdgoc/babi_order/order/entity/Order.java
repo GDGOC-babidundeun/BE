@@ -68,6 +68,11 @@ public class Order {
         return Collections.unmodifiableList(items);
     }
 
+    // Toss는 orderId가 6자 이상이어야 하므로, PK를 0으로 패딩해 항상 요구 조건을 만족시킨다.
+    public String getTossOrderId() {
+        return String.format("%06d", id);
+    }
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
