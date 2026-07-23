@@ -25,13 +25,13 @@ public class MenuDetailResponse {
     @Schema(description = "메뉴명", example = "삼겹 제육 덮밥")
     private String name;
 
-    @Schema(description = "메뉴 설명")
+    @Schema(description = "메뉴 설명", example = "제육 볶음을 올린 덮밥")
     private String description;
 
     @Schema(description = "기본 가격", example = "8000")
     private Integer basePrice;
 
-    @Schema(description = "메뉴 이미지 URL")
+    @Schema(description = "메뉴 이미지 URL", example = "https://babidndn.shop/images/menu/1.jpg")
     private String imageUrl;
 
     @Schema(description = "표시 순서", example = "1")

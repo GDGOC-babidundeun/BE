@@ -19,10 +19,10 @@ public class PaymentWebhookRequest {
     @NoArgsConstructor
     public static class Data {
 
-        @Schema(description = "토스 결제 키")
+        @Schema(description = "토스 결제 키", example = "tviva20260723151557o3Qi4")
         private String paymentKey;
 
-        @Schema(description = "토스 주문번호")
+        @Schema(description = "토스 주문번호", example = "000001-a1b2c3d4")
         private String orderId;
 
         @Schema(description = "결제 상태", example = "DONE")

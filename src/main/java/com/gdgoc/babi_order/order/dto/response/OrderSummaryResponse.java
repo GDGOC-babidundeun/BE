@@ -12,10 +12,19 @@ import java.time.LocalDateTime;
 @Schema(description = "주문 요약 정보")
 public class OrderSummaryResponse {
 
+    @Schema(description = "주문 ID", example = "1")
     private Long id;
+
+    @Schema(description = "픽업 번호", example = "12")
     private Integer pickupNumber;
+
+    @Schema(description = "주문 상태", example = "PREPARING")
     private String status;
+
+    @Schema(description = "총 결제 금액", example = "8000")
     private Integer totalAmount;
+
+    @Schema(description = "주문 생성 시각")
     private LocalDateTime createdAt;
 
     public static OrderSummaryResponse from(Order order) {
