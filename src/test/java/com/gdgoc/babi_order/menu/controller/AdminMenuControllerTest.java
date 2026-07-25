@@ -2,6 +2,7 @@ package com.gdgoc.babi_order.menu.controller;
 
 import com.gdgoc.babi_order.config.CorsProperties;
 import com.gdgoc.babi_order.config.SecurityConfig;
+import com.gdgoc.babi_order.admin.security.AdminAuthenticationEntryPoint;
 import com.gdgoc.babi_order.menu.dto.response.CategoryResponse;
 import com.gdgoc.babi_order.menu.dto.response.MenuDetailResponse;
 import com.gdgoc.babi_order.menu.exception.MenuExceptionHandler;
@@ -11,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,7 +30,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminMenuController.class)
-@Import({SecurityConfig.class, CorsProperties.class, MenuExceptionHandler.class})
+@Import({
+        SecurityConfig.class,
+        CorsProperties.class,
+        MenuExceptionHandler.class,
+        AdminAuthenticationEntryPoint.class
+})
+@WithMockUser(roles = "ADMIN")
 class AdminMenuControllerTest {
 
     @Autowired
@@ -129,5 +138,13 @@ class AdminMenuControllerTest {
     void deleteMenuReturnsNoContent() throws Exception {
         mockMvc.perform(delete("/api/admin/menus/10"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @WithAnonymousUser
+    void adminApiRequiresAuthentication() throws Exception {
+        mockMvc.perform(delete("/api/admin/menus/10"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 }
