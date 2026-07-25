@@ -9,6 +9,7 @@ import com.gdgoc.babi_order.payment.dto.response.PaymentResponse;
 import com.gdgoc.babi_order.payment.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class PaymentController {
 
     @Operation(summary = "결제 승인 (수동)", description = "paymentKey, orderId, amount를 직접 입력해서 승인합니다.")
     @PostMapping("/confirm")
-    public ResponseEntity<PaymentConfirmResponse> confirm(@RequestBody PaymentConfirmRequest request) {
+    public ResponseEntity<PaymentConfirmResponse> confirm(@Valid @RequestBody PaymentConfirmRequest request) {
         return ResponseEntity.ok(paymentService.confirm(request));
     }
 
@@ -54,7 +55,7 @@ public class PaymentController {
     @PostMapping("/{paymentKey}/cancel")
     public ResponseEntity<PaymentResponse> cancel(
             @PathVariable("paymentKey") String paymentKey,
-            @RequestBody PaymentCancelRequest request) {
+            @Valid @RequestBody PaymentCancelRequest request) {
         return ResponseEntity.ok(paymentService.cancel(paymentKey, request));
     }
 

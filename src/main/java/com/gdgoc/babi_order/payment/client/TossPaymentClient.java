@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
@@ -45,9 +46,11 @@ public class TossPaymentClient {
             ResponseEntity<TossPaymentResponse> response = restTemplate.postForEntity(
                     url, new HttpEntity<>(body, createHeaders()), TossPaymentResponse.class);
             return response.getBody();
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             TossErrorResponse error = e.getResponseBodyAs(TossErrorResponse.class);
             throw new TossPaymentException(error != null ? error.getMessage() : "토스 결제 승인 실패");
+        } catch (RestClientException e) {
+            throw new TossPaymentException("토스 결제 서버와 통신에 실패했습니다.");
         }
     }
 
@@ -59,9 +62,11 @@ public class TossPaymentClient {
             ResponseEntity<TossPaymentResponse> response = restTemplate.postForEntity(
                     url, new HttpEntity<>(body, createHeaders()), TossPaymentResponse.class);
             return response.getBody();
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             TossErrorResponse error = e.getResponseBodyAs(TossErrorResponse.class);
             throw new TossPaymentException(error != null ? error.getMessage() : "토스 결제 취소 실패");
+        } catch (RestClientException e) {
+            throw new TossPaymentException("토스 결제 서버와 통신에 실패했습니다.");
         }
     }
 
@@ -72,9 +77,11 @@ public class TossPaymentClient {
             ResponseEntity<TossPaymentResponse> response = restTemplate.exchange(
                     url, HttpMethod.GET, new HttpEntity<>(createHeaders()), TossPaymentResponse.class);
             return response.getBody();
-        } catch (HttpClientErrorException e) {
+        } catch (HttpStatusCodeException e) {
             TossErrorResponse error = e.getResponseBodyAs(TossErrorResponse.class);
             throw new TossPaymentException(error != null ? error.getMessage() : "토스 결제 조회 실패");
+        } catch (RestClientException e) {
+            throw new TossPaymentException("토스 결제 서버와 통신에 실패했습니다.");
         }
     }
 
