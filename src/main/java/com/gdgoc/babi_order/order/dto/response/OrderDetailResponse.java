@@ -28,6 +28,9 @@ public class OrderDetailResponse {
     @Schema(description = "총 결제 금액", example = "8000")
     private Integer totalAmount;
 
+    @Schema(description = "결제 상태 (결제 전이면 UNPAID)", example = "DONE")
+    private String paymentStatus;
+
     @Schema(description = "주문 생성 시각")
     private LocalDateTime createdAt;
 
@@ -37,13 +40,14 @@ public class OrderDetailResponse {
     @Schema(description = "주문 상품 목록")
     private List<OrderItemResponse> items;
 
-    public static OrderDetailResponse from(Order order) {
+    public static OrderDetailResponse from(Order order, String paymentStatus) {
         return OrderDetailResponse.builder()
                 .id(order.getId())
                 .tossOrderId(order.getTossOrderId())
                 .pickupNumber(order.getPickupNumber())
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())
+                .paymentStatus(paymentStatus)
                 .createdAt(order.getCreatedAt())
                 .updatedAt(order.getUpdatedAt())
                 .items(order.getItems().stream().map(OrderItemResponse::from).toList())

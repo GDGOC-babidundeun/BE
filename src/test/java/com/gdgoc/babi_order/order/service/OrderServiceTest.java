@@ -11,9 +11,14 @@ import com.gdgoc.babi_order.order.dto.request.OrderCreateRequest;
 import com.gdgoc.babi_order.order.dto.request.OrderItemOptionRequest;
 import com.gdgoc.babi_order.order.dto.request.OrderItemRequest;
 import com.gdgoc.babi_order.order.dto.response.OrderDetailResponse;
+import com.gdgoc.babi_order.order.dto.response.OrderSummaryResponse;
+import com.gdgoc.babi_order.order.entity.Order;
 import com.gdgoc.babi_order.order.exception.OrderApiException;
 import com.gdgoc.babi_order.order.exception.OrderNotFoundException;
 import com.gdgoc.babi_order.order.repository.OrderRepository;
+import com.gdgoc.babi_order.payment.entity.Payment;
+import com.gdgoc.babi_order.payment.entity.PaymentStatus;
+import com.gdgoc.babi_order.payment.repository.PaymentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,11 +46,14 @@ class OrderServiceTest {
     @Mock
     private MenuOptionRepository menuOptionRepository;
 
+    @Mock
+    private PaymentRepository paymentRepository;
+
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
-        orderService = new OrderService(orderRepository, menuRepository, menuOptionRepository);
+        orderService = new OrderService(orderRepository, menuRepository, menuOptionRepository, paymentRepository);
     }
 
     @Test
@@ -75,6 +83,7 @@ class OrderServiceTest {
 
         assertThat(result.getPickupNumber()).isEqualTo(8);
         assertThat(result.getTotalAmount()).isEqualTo(18000);
+        assertThat(result.getPaymentStatus()).isEqualTo("UNPAID");
         assertThat(result.getItems().getFirst().getMenuName()).isEqualTo("바비 비빔밥");
         assertThat(result.getItems().getFirst().getOptions().getFirst().getAdditionalPrice())
                 .isEqualTo(1000);
@@ -119,6 +128,67 @@ class OrderServiceTest {
 
         assertThatThrownBy(() -> orderService.getOrder(999L))
                 .isInstanceOf(OrderNotFoundException.class);
+    }
+
+    @Test
+    void getOrderReturnsUnpaidWhenNoPaymentExists() {
+        Order order = order(1L, 1);
+        given(orderRepository.findById(1L)).willReturn(Optional.of(order));
+        given(paymentRepository.findByOrder_Id(1L)).willReturn(Optional.empty());
+
+        OrderDetailResponse result = orderService.getOrder(1L);
+
+        assertThat(result.getPaymentStatus()).isEqualTo("UNPAID");
+    }
+
+    @Test
+    void getOrderReturnsDoneWhenPaymentIsCompleted() {
+        Order order = order(1L, 1);
+        Payment payment = payment(order, PaymentStatus.DONE);
+        given(orderRepository.findById(1L)).willReturn(Optional.of(order));
+        given(paymentRepository.findByOrder_Id(1L)).willReturn(Optional.of(payment));
+
+        OrderDetailResponse result = orderService.getOrder(1L);
+
+        assertThat(result.getPaymentStatus()).isEqualTo("DONE");
+    }
+
+    @Test
+    void getOrdersMapsPaymentStatusPerOrderIncludingUnpaidOrders() {
+        Order paidOrder = order(1L, 1);
+        Order unpaidOrder = order(2L, 2);
+        Payment payment = payment(paidOrder, PaymentStatus.DONE);
+        given(orderRepository.findAllByOrderByCreatedAtDescIdDesc())
+                .willReturn(List.of(paidOrder, unpaidOrder));
+        given(paymentRepository.findByOrder_IdIn(List.of(1L, 2L))).willReturn(List.of(payment));
+
+        List<OrderSummaryResponse> result = orderService.getOrders();
+
+        assertThat(result)
+                .extracting(OrderSummaryResponse::getId, OrderSummaryResponse::getPaymentStatus)
+                .containsExactlyInAnyOrder(
+                        org.assertj.core.groups.Tuple.tuple(1L, "DONE"),
+                        org.assertj.core.groups.Tuple.tuple(2L, "UNPAID"));
+    }
+
+    private Order order(Long id, Integer pickupNumber) {
+        Order order = new Order(pickupNumber);
+        ReflectionTestUtils.setField(order, "id", id);
+        ReflectionTestUtils.setField(order, "totalAmount", 8000);
+        return order;
+    }
+
+    private Payment payment(Order order, PaymentStatus status) {
+        Payment payment = Payment.builder()
+                .order(order)
+                .tossOrderId(order.getTossOrderId())
+                .paymentKey("payKey-" + order.getId())
+                .amount(order.getTotalAmount())
+                .status(status)
+                .approvedAt(java.time.LocalDateTime.now())
+                .build();
+        ReflectionTestUtils.setField(payment, "id", order.getId() * 100);
+        return payment;
     }
 
     private OrderCreateRequest request(Long menuId, Long optionId, Integer optionQuantity) {
