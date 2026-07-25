@@ -1,5 +1,6 @@
 package com.gdgoc.babi_order.order.exception;
 
+import com.gdgoc.babi_order.menu.exception.MenuNotFoundException;
 import com.gdgoc.babi_order.order.controller.OrderController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,16 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice(assignableTypes = OrderController.class)
 public class OrderExceptionHandler {
+
+    @ExceptionHandler(MenuNotFoundException.class)
+    public ResponseEntity<OrderErrorResponse> handleMenuNotFound(MenuNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new OrderErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "MENU_NOT_FOUND",
+                exception.getMessage(),
+                LocalDateTime.now()
+        ));
+    }
 
     @ExceptionHandler(OrderApiException.class)
     public ResponseEntity<OrderErrorResponse> handleOrderApiException(OrderApiException exception) {

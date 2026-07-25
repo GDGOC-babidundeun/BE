@@ -2,6 +2,7 @@ package com.gdgoc.babi_order.order.controller;
 
 import com.gdgoc.babi_order.config.CorsProperties;
 import com.gdgoc.babi_order.config.SecurityConfig;
+import com.gdgoc.babi_order.menu.exception.MenuNotFoundException;
 import com.gdgoc.babi_order.order.dto.response.OrderDetailResponse;
 import com.gdgoc.babi_order.order.dto.response.OrderSummaryResponse;
 import com.gdgoc.babi_order.order.exception.OrderExceptionHandler;
@@ -79,6 +80,27 @@ class OrderControllerTest {
                         .content("{\"items\": []}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void createOrderReturnsNotFoundWhenMenuDoesNotExist() throws Exception {
+        given(orderService.createOrder(any())).willThrow(new MenuNotFoundException(999L));
+
+        mockMvc.perform(post("/api/orders")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "items": [
+                                    {
+                                      "menuId": 999,
+                                      "quantity": 1,
+                                      "options": []
+                                    }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("MENU_NOT_FOUND"));
     }
 
     @Test
