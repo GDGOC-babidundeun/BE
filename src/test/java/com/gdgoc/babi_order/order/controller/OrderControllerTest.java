@@ -7,20 +7,24 @@ import com.gdgoc.babi_order.order.dto.response.OrderSummaryResponse;
 import com.gdgoc.babi_order.order.exception.OrderExceptionHandler;
 import com.gdgoc.babi_order.order.exception.OrderNotFoundException;
 import com.gdgoc.babi_order.order.service.OrderService;
+import com.gdgoc.babi_order.order.service.OrderEventService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -33,6 +37,9 @@ class OrderControllerTest {
 
     @MockitoBean
     private OrderService orderService;
+
+    @MockitoBean
+    private OrderEventService orderEventService;
 
     @Test
     void createOrderReturnsCreated() throws Exception {
@@ -96,5 +103,44 @@ class OrderControllerTest {
         mockMvc.perform(get("/api/orders/999"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
+    }
+
+    @Test
+    void updateOrderStatusReturnsUpdatedOrder() throws Exception {
+        given(orderService.updateStatus(any(), any())).willReturn(OrderDetailResponse.builder()
+                .id(1L)
+                .pickupNumber(1)
+                .status("READY")
+                .paymentStatus("DONE")
+                .totalAmount(18000)
+                .items(List.of())
+                .build());
+
+        mockMvc.perform(patch("/api/orders/1/status")
+                        .contentType("application/json")
+                        .content("{\"status\":\"READY\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.status").value("READY"));
+    }
+
+    @Test
+    void updateOrderStatusReturnsBadRequestWhenStatusIsMissing() throws Exception {
+        mockMvc.perform(patch("/api/orders/1/status")
+                        .contentType("application/json")
+                        .content("{}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_REQUEST"));
+    }
+
+    @Test
+    void subscribeOrderEventsStartsSseStreamWithoutProxyBuffering() throws Exception {
+        given(orderEventService.subscribe()).willReturn(new SseEmitter());
+
+        mockMvc.perform(get("/api/orders/stream"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-cache"))
+                .andExpect(header().string("X-Accel-Buffering", "no"))
+                .andExpect(request().asyncStarted());
     }
 }
