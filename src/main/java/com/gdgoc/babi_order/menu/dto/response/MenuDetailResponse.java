@@ -40,6 +40,9 @@ public class MenuDetailResponse {
     @Schema(description = "판매 상태", example = "AVAILABLE")
     private String saleStatus;
 
+    @Schema(description = "토핑 선택 가능 여부", example = "true")
+    private boolean toppingEnabled;
+
     @Schema(description = "선택 가능한 옵션")
     private List<MenuOptionResponse> options;
 
@@ -54,6 +57,10 @@ public class MenuDetailResponse {
                 .imageUrl(menu.getImageUrl())
                 .displayOrder(menu.getDisplayOrder())
                 .saleStatus(menu.getSaleStatus().name())
+                .toppingEnabled(options.stream().anyMatch(option ->
+                        option.getGroupType() == com.gdgoc.babi_order.menu.entity.OptionGroupType.TOPPING_ADD
+                                || option.getGroupType()
+                                == com.gdgoc.babi_order.menu.entity.OptionGroupType.TOPPING_REMOVE))
                 .options(options.stream().map(MenuOptionResponse::from).toList())
                 .build();
     }

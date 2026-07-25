@@ -44,7 +44,7 @@ public class Menu {
     @Column(name = "base_price", nullable = false)
     private Integer basePrice;
 
-    @Column(name = "image_url", length = 500)
+    @Column(name = "image_url", length = 100)
     private String imageUrl;
 
     @Column(name = "display_order", nullable = false)
@@ -71,6 +71,21 @@ public class Menu {
         this.imageUrl = imageUrl;
         this.displayOrder = displayOrder;
         this.saleStatus = saleStatus == null ? SaleStatus.AVAILABLE : saleStatus;
+    }
+
+    public void update(Category category, String name, String description, Integer basePrice,
+                       String imageUrl, Integer displayOrder, SaleStatus saleStatus) {
+        this.category = category;
+        this.name = name;
+        this.description = description;
+        this.basePrice = basePrice;
+        this.imageUrl = imageUrl;
+        this.displayOrder = displayOrder;
+        this.saleStatus = saleStatus;
+    }
+
+    public void changeSaleStatus(SaleStatus saleStatus) {
+        this.saleStatus = saleStatus;
     }
 
     @PrePersist

@@ -74,6 +74,16 @@ public class MenuOption {
         this.displayOrder = displayOrder;
     }
 
+    public void update(OptionGroupType groupType, String name, Integer additionalPrice,
+                       Integer maxQuantity, boolean defaultSelected, Integer displayOrder) {
+        this.groupType = groupType;
+        this.name = name;
+        this.additionalPrice = additionalPrice;
+        this.maxQuantity = maxQuantity;
+        this.defaultSelected = defaultSelected;
+        this.displayOrder = displayOrder;
+    }
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

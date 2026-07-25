@@ -36,7 +36,7 @@ public class OrderItemResponse {
     public static OrderItemResponse from(OrderItem item) {
         return OrderItemResponse.builder()
                 .id(item.getId())
-                .menuId(item.getMenu().getId())
+                .menuId(item.getMenu() == null ? null : item.getMenu().getId())
                 .menuName(item.getMenuNameSnapshot())
                 .menuPrice(item.getMenuPriceSnapshot())
                 .quantity(item.getQuantity())
