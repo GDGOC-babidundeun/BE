@@ -69,6 +69,10 @@ public class Order {
         return Collections.unmodifiableList(items);
     }
 
+    public void changeStatus(OrderStatus nextStatus) {
+        this.status = nextStatus;
+    }
+
     // Toss 샌드박스는 orderId 유일성을 전체 테스트 계정 간에 공유하므로,
     // PK를 0-패딩한 뒤 랜덤 접미사를 붙여 다른 계정과의 충돌을 피한다.
     public String getTossOrderId() {
