@@ -17,6 +17,9 @@ import com.gdgoc.babi_order.order.entity.OrderItemOption;
 import com.gdgoc.babi_order.order.exception.OrderApiException;
 import com.gdgoc.babi_order.order.exception.OrderNotFoundException;
 import com.gdgoc.babi_order.order.repository.OrderRepository;
+import com.gdgoc.babi_order.payment.entity.Payment;
+import com.gdgoc.babi_order.payment.entity.PaymentStatus;
+import com.gdgoc.babi_order.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,16 +27,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OrderService {
 
+    private static final String UNPAID = "UNPAID";
+
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
     private final MenuOptionRepository menuOptionRepository;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public OrderDetailResponse createOrder(OrderCreateRequest request) {
@@ -44,19 +52,37 @@ public class OrderService {
             order.addItem(createOrderItem(itemRequest));
         }
 
-        return OrderDetailResponse.from(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        return OrderDetailResponse.from(saved, UNPAID);
     }
 
     public List<OrderSummaryResponse> getOrders() {
-        return orderRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
-                .map(OrderSummaryResponse::from)
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDescIdDesc();
+        Map<Long, PaymentStatus> paymentStatusByOrderId = paymentStatusByOrderId(
+                orders.stream().map(Order::getId).toList());
+
+        return orders.stream()
+                .map(order -> OrderSummaryResponse.from(order, toPaymentStatusName(
+                        paymentStatusByOrderId.get(order.getId()))))
                 .toList();
     }
 
     public OrderDetailResponse getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        return OrderDetailResponse.from(order);
+        PaymentStatus paymentStatus = paymentRepository.findByOrder_Id(orderId)
+                .map(Payment::getStatus)
+                .orElse(null);
+        return OrderDetailResponse.from(order, toPaymentStatusName(paymentStatus));
+    }
+
+    private Map<Long, PaymentStatus> paymentStatusByOrderId(List<Long> orderIds) {
+        return paymentRepository.findByOrder_IdIn(orderIds).stream()
+                .collect(Collectors.toMap(payment -> payment.getOrder().getId(), Payment::getStatus));
+    }
+
+    private String toPaymentStatusName(PaymentStatus status) {
+        return status == null ? UNPAID : status.name();
     }
 
     private OrderItem createOrderItem(OrderItemRequest request) {

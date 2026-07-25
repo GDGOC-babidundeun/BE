@@ -24,15 +24,19 @@ public class OrderSummaryResponse {
     @Schema(description = "총 결제 금액", example = "8000")
     private Integer totalAmount;
 
+    @Schema(description = "결제 상태 (결제 전이면 UNPAID)", example = "DONE")
+    private String paymentStatus;
+
     @Schema(description = "주문 생성 시각")
     private LocalDateTime createdAt;
 
-    public static OrderSummaryResponse from(Order order) {
+    public static OrderSummaryResponse from(Order order, String paymentStatus) {
         return OrderSummaryResponse.builder()
                 .id(order.getId())
                 .pickupNumber(order.getPickupNumber())
                 .status(order.getStatus().name())
                 .totalAmount(order.getTotalAmount())
+                .paymentStatus(paymentStatus)
                 .createdAt(order.getCreatedAt())
                 .build();
     }
