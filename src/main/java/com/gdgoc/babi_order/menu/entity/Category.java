@@ -43,6 +43,11 @@ public class Category {
         this.displayOrder = displayOrder;
     }
 
+    public void update(String name, Integer displayOrder) {
+        this.name = name;
+        this.displayOrder = displayOrder;
+    }
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

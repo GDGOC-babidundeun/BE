@@ -14,4 +14,10 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     @EntityGraph(attributePaths = "category")
     Optional<Menu> findWithCategoryById(Long id);
+
+    boolean existsByCategoryId(Long categoryId);
+
+    boolean existsByCategoryIdAndName(Long categoryId, String name);
+
+    boolean existsByCategoryIdAndNameAndIdNot(Long categoryId, String name, Long id);
 }

@@ -4,8 +4,10 @@ import com.gdgoc.babi_order.payment.controller.PaymentController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 
@@ -42,6 +44,26 @@ public class PaymentExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "INVALID_REQUEST",
                 message,
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<PaymentErrorResponse> handleMissingParameter(MissingServletRequestParameterException exception) {
+        return ResponseEntity.badRequest().body(new PaymentErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_REQUEST",
+                "필수 파라미터가 누락되었습니다: " + exception.getParameterName(),
+                LocalDateTime.now()
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<PaymentErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+        return ResponseEntity.badRequest().body(new PaymentErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_REQUEST",
+                "파라미터 형식이 올바르지 않습니다: " + exception.getName(),
                 LocalDateTime.now()
         ));
     }

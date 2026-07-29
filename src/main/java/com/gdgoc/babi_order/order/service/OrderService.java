@@ -14,26 +14,38 @@ import com.gdgoc.babi_order.order.dto.response.OrderSummaryResponse;
 import com.gdgoc.babi_order.order.entity.Order;
 import com.gdgoc.babi_order.order.entity.OrderItem;
 import com.gdgoc.babi_order.order.entity.OrderItemOption;
+import com.gdgoc.babi_order.order.entity.OrderStatus;
 import com.gdgoc.babi_order.order.exception.OrderApiException;
 import com.gdgoc.babi_order.order.exception.OrderNotFoundException;
 import com.gdgoc.babi_order.order.repository.OrderRepository;
+import com.gdgoc.babi_order.payment.entity.Payment;
+import com.gdgoc.babi_order.payment.entity.PaymentStatus;
+import com.gdgoc.babi_order.payment.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OrderService {
 
+    private static final String UNPAID = "UNPAID";
+
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
     private final MenuOptionRepository menuOptionRepository;
+    private final PaymentRepository paymentRepository;
+    private final OrderEventService orderEventService;
 
     @Transactional
     public OrderDetailResponse createOrder(OrderCreateRequest request) {
@@ -44,19 +56,89 @@ public class OrderService {
             order.addItem(createOrderItem(itemRequest));
         }
 
-        return OrderDetailResponse.from(orderRepository.save(order));
+        Order saved = orderRepository.save(order);
+        OrderDetailResponse response = OrderDetailResponse.from(saved, UNPAID);
+        publishAfterCommit("ORDER_CREATED", response);
+        return response;
     }
 
     public List<OrderSummaryResponse> getOrders() {
-        return orderRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
-                .map(OrderSummaryResponse::from)
+        List<Order> orders = orderRepository.findAllByOrderByCreatedAtDescIdDesc();
+        Map<Long, PaymentStatus> paymentStatusByOrderId = paymentStatusByOrderId(
+                orders.stream().map(Order::getId).toList());
+
+        return orders.stream()
+                .map(order -> OrderSummaryResponse.from(order, toPaymentStatusName(
+                        paymentStatusByOrderId.get(order.getId()))))
                 .toList();
     }
 
     public OrderDetailResponse getOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
-        return OrderDetailResponse.from(order);
+        PaymentStatus paymentStatus = paymentRepository.findByOrder_Id(orderId)
+                .map(Payment::getStatus)
+                .orElse(null);
+        return OrderDetailResponse.from(order, toPaymentStatusName(paymentStatus));
+    }
+
+    @Transactional
+    public OrderDetailResponse updateStatus(Long orderId, OrderStatus nextStatus) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+        validateStatusTransition(order.getStatus(), nextStatus);
+        order.changeStatus(nextStatus);
+
+        PaymentStatus paymentStatus = paymentRepository.findByOrder_Id(orderId)
+                .map(Payment::getStatus)
+                .orElse(null);
+        OrderDetailResponse response = OrderDetailResponse.from(
+                order, toPaymentStatusName(paymentStatus));
+        publishAfterCommit("ORDER_STATUS_CHANGED", response);
+        return response;
+    }
+
+    private void publishAfterCommit(String eventName, OrderDetailResponse response) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive()
+                || !TransactionSynchronizationManager.isSynchronizationActive()) {
+            orderEventService.publish(eventName, response);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                orderEventService.publish(eventName, response);
+            }
+        });
+    }
+
+    private void validateStatusTransition(OrderStatus currentStatus, OrderStatus nextStatus) {
+        if (currentStatus == nextStatus) {
+            return;
+        }
+        boolean valid = switch (currentStatus) {
+            case PREPARING -> nextStatus == OrderStatus.READY
+                    || nextStatus == OrderStatus.CANCELED;
+            case READY -> nextStatus == OrderStatus.COMPLETED
+                    || nextStatus == OrderStatus.CANCELED;
+            case COMPLETED, CANCELED -> false;
+        };
+        if (!valid) {
+            throw new OrderApiException(
+                    HttpStatus.CONFLICT,
+                    "INVALID_ORDER_STATUS_TRANSITION",
+                    "변경할 수 없는 주문 상태입니다. " + currentStatus + " -> " + nextStatus
+            );
+        }
+    }
+
+    private Map<Long, PaymentStatus> paymentStatusByOrderId(List<Long> orderIds) {
+        return paymentRepository.findByOrder_IdIn(orderIds).stream()
+                .collect(Collectors.toMap(payment -> payment.getOrder().getId(), Payment::getStatus));
+    }
+
+    private String toPaymentStatusName(PaymentStatus status) {
+        return status == null ? UNPAID : status.name();
     }
 
     private OrderItem createOrderItem(OrderItemRequest request) {
