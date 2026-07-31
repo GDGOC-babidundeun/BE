@@ -7,6 +7,7 @@ import com.gdgoc.babi_order.menu.dto.response.CategoryResponse;
 import com.gdgoc.babi_order.menu.dto.response.MenuDetailResponse;
 import com.gdgoc.babi_order.menu.exception.MenuExceptionHandler;
 import com.gdgoc.babi_order.menu.service.AdminMenuService;
+import com.gdgoc.babi_order.menu.service.MenuImageService;
 import com.gdgoc.babi_order.menu.service.MenuService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,9 @@ class AdminMenuControllerTest {
 
     @MockitoBean
     private MenuService menuService;
+
+    @MockitoBean
+    private MenuImageService menuImageService;
 
     @Test
     void createCategoryReturnsCreated() throws Exception {

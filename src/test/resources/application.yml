@@ -14,3 +14,8 @@ toss:
   payments:
     secret-key: test-secret-key
     base-url: https://api.tosspayments.com
+
+aws:
+  s3:
+    region: ap-northeast-2
+    bucket: babi-order-images
