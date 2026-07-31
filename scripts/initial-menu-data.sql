@@ -94,7 +94,21 @@ LEFT JOIN menus menu
     AND menu.name = source.name
 WHERE menu.id IS NULL;
 
--- 컵밥과 세트 메뉴에 토핑 6종을 연결합니다.
+-- 기존 초기 데이터에서 SIZE로 잘못 저장된 '밥 추가'를 추가 토핑으로 교정합니다.
+UPDATE menu_options menu_option
+JOIN menus menu ON menu.id = menu_option.menu_id
+JOIN categories category ON category.id = menu.category_id
+SET
+    menu_option.group_type = 'TOPPING_ADD',
+    menu_option.additional_price = 1000,
+    menu_option.max_quantity = 3,
+    menu_option.default_selected = FALSE,
+    menu_option.display_order = 2,
+    menu_option.updated_at = NOW(6)
+WHERE category.name IN ('컵밥', '세트')
+  AND menu_option.name = '밥 추가';
+
+-- 컵밥과 세트 메뉴에 사이즈 3종, 추가 토핑 6종, 제외 토핑 2종을 연결합니다.
 -- 세트 메뉴의 옵션은 세트에 포함된 컵밥에 적용합니다.
 INSERT INTO menu_options (
     menu_id,
@@ -109,26 +123,37 @@ INSERT INTO menu_options (
 )
 SELECT
     menu.id,
-    topping.group_type,
-    topping.name,
-    topping.additional_price,
-    3,
-    FALSE,
-    topping.display_order,
+    option_source.group_type,
+    option_source.name,
+    option_source.additional_price,
+    option_source.max_quantity,
+    option_source.default_selected,
+    option_source.display_order,
     NOW(6),
     NOW(6)
 FROM menus menu
 JOIN categories category ON category.id = menu.category_id
 CROSS JOIN (
-    SELECT 'TOPPING_ADD' AS group_type, '계란후라이' AS name, 700 AS additional_price, 1 AS display_order
-    UNION ALL SELECT 'SIZE', '밥 추가', 1000, 2
-    UNION ALL SELECT 'TOPPING_ADD', '고기 추가', 1000, 3
-    UNION ALL SELECT 'TOPPING_ADD', '모짜렐라치즈', 1000, 4
-    UNION ALL SELECT 'TOPPING_ADD', '체다치즈', 500, 5
-    UNION ALL SELECT 'TOPPING_ADD', '스팸', 700, 6
-) AS topping
+    SELECT
+        'SIZE' AS group_type,
+        '싱글' AS name,
+        0 AS additional_price,
+        1 AS max_quantity,
+        TRUE AS default_selected,
+        1 AS display_order
+    UNION ALL SELECT 'SIZE', '더블', 1000, 1, FALSE, 2
+    UNION ALL SELECT 'SIZE', '점보', 2000, 1, FALSE, 3
+    UNION ALL SELECT 'TOPPING_ADD', '계란후라이', 700, 3, FALSE, 1
+    UNION ALL SELECT 'TOPPING_ADD', '밥 추가', 1000, 3, FALSE, 2
+    UNION ALL SELECT 'TOPPING_ADD', '고기 추가', 1000, 3, FALSE, 3
+    UNION ALL SELECT 'TOPPING_ADD', '모짜렐라치즈', 1000, 3, FALSE, 4
+    UNION ALL SELECT 'TOPPING_ADD', '체다치즈', 500, 3, FALSE, 5
+    UNION ALL SELECT 'TOPPING_ADD', '스팸', 700, 3, FALSE, 6
+    UNION ALL SELECT 'TOPPING_REMOVE', '김치 제외', 0, 1, FALSE, 1
+    UNION ALL SELECT 'TOPPING_REMOVE', '고추장 소스 제외', 0, 1, FALSE, 2
+) AS option_source
 LEFT JOIN menu_options menu_option
     ON menu_option.menu_id = menu.id
-    AND menu_option.name = topping.name
+    AND menu_option.name = option_source.name
 WHERE category.name IN ('컵밥', '세트')
   AND menu_option.id IS NULL;
