@@ -1,13 +1,16 @@
 package com.gdgoc.babi_order.menu.controller;
 
 import com.gdgoc.babi_order.menu.dto.request.CategoryUpsertRequest;
+import com.gdgoc.babi_order.menu.dto.request.MenuImageUploadUrlRequest;
 import com.gdgoc.babi_order.menu.dto.request.MenuOptionUpsertRequest;
 import com.gdgoc.babi_order.menu.dto.request.MenuSaleStatusUpdateRequest;
 import com.gdgoc.babi_order.menu.dto.request.MenuUpsertRequest;
 import com.gdgoc.babi_order.menu.dto.response.CategoryMenuResponse;
 import com.gdgoc.babi_order.menu.dto.response.CategoryResponse;
 import com.gdgoc.babi_order.menu.dto.response.MenuDetailResponse;
+import com.gdgoc.babi_order.menu.dto.response.MenuImageUploadUrlResponse;
 import com.gdgoc.babi_order.menu.service.AdminMenuService;
+import com.gdgoc.babi_order.menu.service.MenuImageService;
 import com.gdgoc.babi_order.menu.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -35,6 +38,14 @@ public class AdminMenuController {
 
     private final AdminMenuService adminMenuService;
     private final MenuService menuService;
+    private final MenuImageService menuImageService;
+
+    @PostMapping("/menus/image-upload-url")
+    @Operation(summary = "메뉴 이미지 업로드용 Presigned URL 발급")
+    public ResponseEntity<MenuImageUploadUrlResponse> createMenuImageUploadUrl(
+            @Valid @RequestBody MenuImageUploadUrlRequest request) {
+        return ResponseEntity.ok(menuImageService.createUploadUrl(request.getContentType()));
+    }
 
     @GetMapping("/categories")
     @Operation(summary = "관리자 카테고리 목록 조회")

@@ -22,7 +22,7 @@ public class MenuSummaryResponse {
     @Schema(description = "기본 가격", example = "8000")
     private Integer basePrice;
 
-    @Schema(description = "메뉴 이미지 URL", example = "https://babidndn.shop/images/menu/1.jpg")
+    @Schema(description = "메뉴 이미지 URL", example = "https://babi-order-images.s3.ap-northeast-2.amazonaws.com/menu/550e8400-e29b-41d4-a716-446655440000.jpg")
     private String imageUrl;
 
     @Schema(description = "표시 순서", example = "1")

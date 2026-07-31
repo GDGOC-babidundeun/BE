@@ -30,7 +30,7 @@ public class MenuUpsertRequest {
     @PositiveOrZero(message = "기본 가격은 0 이상이어야 합니다.")
     private Integer basePrice;
 
-    @Size(max = 100, message = "이미지 URL은 100자 이하여야 합니다.")
+    @Size(max = 255, message = "이미지 URL은 255자 이하여야 합니다.")
     private String imageUrl;
 
     @NotNull(message = "표시 순서는 필수입니다.")
