@@ -44,7 +44,7 @@ public class Menu {
     @Column(name = "base_price", nullable = false)
     private Integer basePrice;
 
-    @Column(name = "image_url", length = 100)
+    @Column(name = "image_url", length = 255)
     private String imageUrl;
 
     @Column(name = "display_order", nullable = false)
